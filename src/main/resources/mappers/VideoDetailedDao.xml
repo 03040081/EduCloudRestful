@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zsc.edu.dao.VideosDetailedDao">
+
+	<resultMap type="VideoInfo" id="VideoDetailedList">
+		<id property="videoId" column="videoId" />
+		<result property="videoTile" column="videoTile" />
+		<result property="studySum" column="studySum" />
+		<result property="prices" column="prices" />
+		<result property="picUrl" column="picUrl" />
+		<result property="videoDiscript" column="videoDiscript" />
+		<association property="rank" javaType="Rank">
+			<id property="rankId" column="rankId" />
+			<result property="rankName" column="rankName" />
+		</association>
+		<collection property="listChapter" javaType="java.util.List"
+			ofType="VideoChapter">
+			<id property="chapterId" column="chapterId" />
+			<result property="chapterName" column="chapterName" />
+			<collection property="listChapterDetailed" javaType="java.util.List"
+				ofType="ChapterDetailed">
+				<id property="detailedId" column="detailedId" />
+				<result property="detailedTile" column="detailedTile" />
+				<result property="videoUrl" column="videoUrl" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<resultMap type="VideoAssess" id="VideoAssessList">
+		<id property="assessId" column="assessId" />
+		<result property="score" column="score" />
+		<result property="contents" column="contents" />
+		<association property="user" javaType="User">
+			<id property="userId" column="userId" />
+			<result property="userName" column="userName" />
+		</association>
+	</resultMap>
+
+	<resultMap type="Forum" id="VideoForumList">
+		<id property="forumId" column="forumId" />
+		<result property="contents" column="contents" />
+		<association property="user" javaType="User">
+			<id property="userId" column="userId" />
+			<result property="userName" column="userName" />
+		</association>
+	</resultMap>
+
+
+	<select id="getVideoDetailed" parameterType="int" resultMap="VideoDetailedList">
+		select * from videoinfo vi
+		left join rank rk on vi.rankId=rk.rankId
+		left join videochapter vc on vi.videoId=vc.videoId
+		left join chapterdetailed cd on vc.chapterId=cd.chapterId
+		where vi.videoId=#{videoId}
+	</select>
+
+	<select id="videoAssessesList" parameterType="Map" resultMap="VideoAssessList">
+		select * from videoassess vs
+		left join user u on vs.userId=u.userId
+		where vs.videoId=#{videoId}
+		limit
+		#{currPage},#{pageSize}
+	</select>
+
+	<select id="forumsList" parameterType="Map" resultMap="VideoForumList">
+		select * from forum f
+		left join user u on f.userId=u.userId
+		where f.videoId=#{videoId}
+		limit #{currPage},#{pageSize}
+	</select>
+
+	<insert id="publishAssess" parameterType="VideoAssess"
+		useGeneratedKeys="true" keyProperty="assessId">
+		insert into
+		videoassess(videoId,userId,score,contents)
+		values(#{videoId},#{user.userId},#{score},#{contents})
+	</insert>
+
+	<insert id="publishForum" parameterType="Forum"
+		useGeneratedKeys="true" keyProperty="forumId">
+		insert into
+		forum(videoId,userId,contents)
+		values(#{videoId},#{user.userId},#{contents})
+	</insert>
+
+	<insert id="publishVideo" parameterType="VideoInfo"
+		useGeneratedKeys="true" keyProperty="videoId">
+		insert into
+		videoinfo(videoTile,videoDiscript,rankId,prices,categoryId,cgdetailedId,majorId,picUrl)
+		values(#{videoTile},#{videoDiscript},#{rank.rankId},#{prices},#{category.categoryId},#{categoryDetailed.cgdetailedId},#{major.majorId},#{picUrl})
+	</insert>
+
+	<insert id="publishVideoChapters" parameterType="VideoChapter"
+		useGeneratedKeys="true" keyProperty="chapterId">
+		insert into videochapter
+		(videoId,chapterName)
+		values
+		(#{videoId},#{chapterName})
+	</insert>
+
+	<insert id="publishChapterDetaileds" parameterType="VideoChapter"
+		useGeneratedKeys="true" keyProperty="chapterDetailed.detailedId">
+		insert into chapterdetailed
+		(chapterId,detailedTile,videoUrl)
+		values
+		<foreach collection="listChapterDetailed" item="chapterDetailed"
+			index="index" separator=",">
+			(#{chapterId},#{chapterDetailed.detailedTile},#{chapterDetailed.videoUrl})
+		</foreach>
+	</insert>
+
+	<select id="getTotalRecordsAssess" parameterType="int"
+		resultType="int">
+		select * from videoassess vs
+		where vs.videoId=#{videoId}
+	</select>
+
+	<select id="getTotalRecordsForum" parameterType="int"
+		resultType="int">
+		select * from forum f
+		where f.videoId=#{videoId}
+	</select>
+
+	<!-- <insert id="publishVideoChapters" parameterType="VideoInfo" useGeneratedKeys="true" 
+		keyProperty="chapterId"> insert into videochapter (videoId,chapterName) values 
+		<foreach collection="listChapter" item="videoChapter" index="index" separator=","> 
+		(#{videoId},#{videoChapter.chapterName}) </foreach> </insert> -->
+</mapper>

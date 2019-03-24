@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zsc.edu.dao.AboutVideosDao">
+
+	<resultMap type="VideoInfo" id="VideoList">
+		<id property="videoId" column="videoId" />
+		<result property="videoTile" column="videoTile" />
+		<result property="studySum" column="studySum" />
+		<result property="prices" column="prices" />
+		<result property="picUrl" column="picUrl" />
+		<result property="recommend" column="recommend"/>
+		<result property="videoDiscript" column="videoDiscript"/>
+		<association property="rank" javaType="Rank">
+			<id property="rankId" column="rankId" />
+			<result property="rankName" column="rankName" />
+		</association>
+	</resultMap>
+
+	<select id="getAboutVideos" parameterType="Map" resultMap="VideoList">
+		select * from videoinfo as vi left join rank as rk on
+		vi.rankId=rk.rankId
+		<where>
+			<if test="recommend!=null">
+				and
+				vi.recommend = #{recommend}
+			</if>
+			<if test="videoTile!=null">
+				and
+				vi.videoTile like "%"#{videoTile}"%"
+			</if>
+			<if test="prices!=null">
+				and
+				vi.prices=#{prices}
+			</if>
+			<if test="rankId!=null">
+				and
+				vi.rankId=#{rankId}
+			</if>
+			<if test="categoryId!=null">
+				and
+				vi.categoryId=#{categoryId}
+			</if>
+			<if test="majorId!=null">
+				and
+				vi.majorId=#{majorId}
+			</if>
+			<if test="cgdetailedId!=null">
+				and
+				vi.cgdetailedId=#{cgdetailedId}
+			</if>
+			<if test="currPage!=null">
+				<if test="pageSize!=null">
+					limit #{currPage} , #{pageSize}
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="getTotalRecords" parameterType="Map" resultType="int">
+		select count(*) from videoinfo as vi
+		<where>
+			<if test="recommend!=null">
+				and
+				vi.recommend=#{recommend}
+			</if>
+			<if test="videoTile!=null">
+				and
+				vi.videoTile like "%"#{videoTile}"%"
+			</if>
+			<if test="prices!=null">
+				and
+				vi.prices=#{prices}
+			</if>
+			<if test="rankId!=null">
+				and
+				vi.rankId=#{rankId}
+			</if>
+			<if test="categoryId!=null">
+				and
+				vi.categoryId=#{categoryId}
+			</if>
+			<if test="majorId!=null">
+				and
+				vi.majorId=#{majorId}
+			</if>
+			<if test="cgdetailedId!=null">
+				and
+				vi.cgdetailedId=#{cgdetailedId}
+			</if>
+		</where>
+	</select>
+</mapper>

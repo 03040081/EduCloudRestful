@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zsc.edu.dao.VideoClassifyDao">
+	
+	<resultMap type="Major" id="MajorClassifyList">
+		<id property="majorId" column="majorId"/>
+		<result property="majorName" column="majorName"/>
+		<collection property="categoryList" javaType="java.util.List" ofType="Category">
+			<id property="categoryId" column="categoryId" />
+			<result property="categoryName" column="categoryName"/>
+			<collection property="categoryDetailedList" javaType="java.util.List" ofType="CategoryDetailed">
+				<id property="cgdetailedId" column="cgdetailedId" />
+				<result property="cgdetailedName" column="cgdetailedName"/>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<select id="getMajors" resultMap="MajorClassifyList">
+		select * from major mj
+		left join category cg
+			on mj.majorId=cg.majorId
+		left join categorydetailed cgd
+			on cg.categoryId=cgd.categoryId
+	</select>
+</mapper>

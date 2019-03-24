@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zsc.edu.dao.UserDao">
+
+	<resultMap type="OrderInfo" id="OrderList">
+		<id property="orderId" column="orderId" />
+		<result property="userId" column="userId" />
+		<result property="orderState" column="orderState" />
+		<association property="videoInfo" javaType="VideoInfo">
+			<id property="videoId" column="videoId" />
+			<result property="videoTile" column="videoTile" />
+			<result property="videoDiscript" column="videoDiscript" />
+			<result property="studySum" column="studySum" />
+			<result property="prices" column="prices" />
+			<result property="picUrl" column="picUrl" />
+			<association property="rank" javaType="Rank">
+				<id property="rankId" column="rankId" />
+				<result property="rankName" column="rankName" />
+			</association>
+		</association>
+	</resultMap>
+
+	<resultMap type="VideoInfo" id="ScheduleList">
+			<id property="videoId" column="videoId" />
+			<result property="videoTile" column="videoTile" />
+			<result property="videoDiscript" column="videoDiscript" />
+			<result property="studySum" column="studySum" />
+			<result property="prices" column="prices" />
+			<result property="picUrl" column="picUrl" />
+			<association property="rank" javaType="Rank">
+				<id property="rankId" column="rankId" />
+				<result property="rankName" column="rankName" />
+			</association>
+	</resultMap>
+
+	<insert id="SignUp" parameterType="User" useGeneratedKeys="true"
+		keyProperty="userId">
+		insert into user(userName,userAccount,userPass,role)
+		values(#{userName},#{userAccount},#{userPass},#{role.roleId})
+	</insert>
+
+	<select id="Login" resultType="User" parameterType="User">
+		select * from
+		user where userAccount=#{userAccount} and userPass=#{userPass}
+	</select>
+
+	<insert id="SubmitOrder" parameterType="OrderInfo"
+		useGeneratedKeys="true" keyProperty="orderId">
+		insert into
+		orderInfo(userId,videoId,orderState)values(#{userId},#{videoInfo.videoId},#{orderState})
+	</insert>
+	<select id="ListOrderInfo" parameterType="int" resultMap="OrderList">
+		select
+		* from orderInfo o left join videoInfo v on o.videoId=v.videoId where
+		o.userId=#{userId}
+	</select>
+	<select id="OrderVideo" parameterType="int" resultType="VideoInfo">
+		select *
+		from videoInfo where videoId=#{videoId}
+	</select>
+
+	<insert id="addSchedule" parameterType="Schedule"
+		useGeneratedKeys="true" keyProperty="orderId">
+		insert into
+		schedule(userId,videoId)values(#{userId},#{videoInfo.videoId})
+	</insert>
+
+	<select id="getUserSchedule" parameterType="int" resultMap="ScheduleList">
+		select * from schedule as sc 
+		left join videoinfo as vi on
+		sc.videoId=vi.videoId
+		left join rank rk on
+		rk.rankId=vi.rankId
+		where sc.userId=#{userId}
+	</select>
+</mapper>
